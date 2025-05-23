@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>เมนูตามประเภท</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header (copied from index.html) -->
+  <header class="bg-white shadow-md p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-orange-600 cursor-pointer" onclick="location.href='index.html'">📖 วงนอก</h1>
+    <div id="userSection" class="flex gap-4 items-center">
+      <button id="openLoginModal" class="text-blue-600 hover:underline">เข้าสู่ระบบ</button>
+      <a href="/register.html" class="text-blue-600 hover:underline">สมัครสมาชิก</a>
+    </div>
+    <div id="profileMenu" class="relative hidden flex items-center gap-3">
+      <span id="userName" class="text-gray-700 font-medium"></span>
+      <button id="profileBtn" class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 focus:outline-none">
+        <img src="https://www.svgrepo.com/show/437117/person-crop-circle.svg" alt="User" class="w-full h-full object-cover">
+      </button>
+      <div id="dropdownMenu" class="absolute right-0 mt-12 w-40 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+        <a href="/manage.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">จัดการสูตรอาหาร</a>
+        <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content -->
+  <main class="p-6 max-w-6xl mx-auto">
+  <h2 class="text-xl font-bold mb-4 text-gray-800">สูตรอาหาร</h2>
+
+  <div class="flex flex-wrap gap-4 mb-6">
+    <select id="filterType" class="p-2 rounded border">
+      <option value="">ทุกประเภทอาหาร</option>
+    </select>
+
+    <select id="filterLevel" class="p-2 rounded border">
+      <option value="">ทุกระดับความยาก</option>
+    </select>
+
+    <select id="filterTime" class="p-2 rounded border">
+      <option value="">ทุกระยะเวลาการปรุง</option>
+    </select>
+
+     <select id="filterRating" class="p-2 rounded border">
+    <option value="">ทุกระดับคะแนน</option>
+    <option value="5">5 ดาว</option>
+    <option value="4">4 ดาวขึ้นไป</option>
+    <option value="3">3 ดาวขึ้นไป</option>
+    <option value="2">2 ดาวขึ้นไป</option>
+    <option value="1">1 ดาวขึ้นไป</option>
+    </select>
+
+    <div class="relative w-64">
+      <input
+        type="text"
+        id="filterUser"
+        placeholder="Search user..."
+        class="w-full border border-gray-300 rounded px-3 py-2"
+        autocomplete="off"
+      />
+      <ul
+        id="userSuggestions"
+        class="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-48 overflow-auto hidden"
+      ></ul>
+    </div>
+  </div>
+
+  <div
+    id="menuCards"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+  ></div>
+</main>
+
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4 text-center">เข้าสู่ระบบ</h2>
+      <form id="loginForm" class="space-y-4">
+        <input type="text" id="username" placeholder="Username" required class="w-full p-2 border rounded" />
+        <input type="password" id="password" placeholder="Password" required class="w-full p-2 border rounded" />
+        <div class="flex justify-end gap-2">
+          <button type="button" id="closeModal" class="text-gray-500 hover:underline">ยกเลิก</button>
+          <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">เข้าสู่ระบบ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal -->
+<div id="menuModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+  <div class="bg-white p-6 rounded-lg w-full max-w-2xl relative">
+    <button id="closeMenuModal" class="absolute top-2 right-2 text-gray-500 hover:text-red-500">&times;</button>
+    <img id="modalImage" class="w-full h-64 object-cover rounded mb-4" />
+    <h2 id="modalTitle" class="text-2xl font-bold text-orange-600 mb-2"></h2>
+    <p id="modalType" class="text-sm mb-1"></p>
+    <p id="modalTime" class="text-sm mb-1"></p>
+    <p id="modalLevel" class="text-sm mb-1"></p>
+    <p id="modalIngredients" class="text-sm mb-1"></p>
+    <p id="modalProcess" class="text-sm mb-3"></p>
+
+    <div id="ratingSection" class="flex gap-1 text-yellow-400 text-2xl"></div>
+  </div>
+</div>
+
+  <script>
+    // Header logic (same as index.html)
+    const loginModal = document.getElementById('loginModal');
+    const openModalBtn = document.getElementById('openLoginModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const loginForm = document.getElementById('loginForm');
+    const userSection = document.getElementById('userSection');
+    const profileBtn = document.getElementById('profileBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const profileMenu = document.getElementById('profileMenu');
+
+    openModalBtn?.addEventListener('click', () => loginModal.classList.remove('hidden'));
+    closeModalBtn?.addEventListener('click', () => loginModal.classList.add('hidden'));
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          loginModal.classList.add('hidden');
+          userSection.classList.add('hidden');
+          profileMenu.classList.remove('hidden');
+          document.getElementById('userName').textContent = `สวัสดีคุณ ${data.name}`;
+        } else {
+          alert(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดขณะเชื่อมต่อเซิร์ฟเวอร์');
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/session');
+        const data = await res.json();
+        if (data.loggedIn) {
+          userSection.classList.add('hidden');
+          profileMenu.classList.remove('hidden');
+          document.getElementById('userName').innerHTML = `สวัสดีคุณ <strong>${data.user.name}</strong>`;
+        }
+      } catch (err) {
+        console.error('Error checking session:', err);
+      }
+
+
+  await loadFilterOptions(); // Load dropdown options
+  const params = new URLSearchParams(window.location.search);
+  const typeFromQuery = params.get('type');
+  if (typeFromQuery) document.getElementById('filterType').value = typeFromQuery;
+
+  await loadMenus(); // Load initial menu
+
+  // Event listeners
+  ['filterType', 'filterLevel', 'filterTime', 'filterRating'].forEach(id =>
+    document.getElementById(id).addEventListener('change', loadMenus)
+  );
+  document.getElementById('filterUser').addEventListener('input', debounce(loadMenus, 300));
+    });
+
+    document.addEventListener('click', async (e) => {
+      if (e.target.id === 'logoutBtn') {
+        await fetch('/api/logout', { method: 'POST' });
+        location.reload();
+      }
+    });
+
+    profileBtn?.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.add('hidden');
+      }
+    });
+
+    async function loadMenuByType(type) {
+      try {
+        const res = await fetch(`/api/menus?type=${type}`);
+        const menus = await res.json();
+        const container = document.getElementById('menuCards');
+        container.innerHTML = '';
+
+        menus.forEach(menu => {
+  const card = document.createElement('div');
+  card.className = 'bg-white rounded-lg shadow hover:shadow-lg transition p-4';
+
+  card.innerHTML = `
+  <img src="${menu.IMAGE_MENU}" alt="${menu.NAME_MENU}" class="w-full h-48 object-cover rounded mb-4">
+  <h2 class="text-xl font-bold text-orange-600 mb-1">${menu.NAME_MENU}</h2>
+  <p class="text-sm text-gray-600 mb-1">ประเภท: ${menu.MENU_TYPE_DES || 'ไม่ระบุ'}</p>
+  <p class="text-sm text-gray-600 mb-1">เวลา: ${menu.TIME_DESCRIPTION || menu.TIME_MENU} นาที</p>
+  <p class="text-sm text-gray-600 mb-2">ระดับ: ${menu.MENU_DESCRIPTION || menu.LEVEL_MENU}</p>
+  <div class="flex text-yellow-400 text-xl">
+    ${'★'.repeat(Math.round(menu.SCORE))}${'☆'.repeat(5 - Math.round(menu.SCORE))}
+  </div>
+`;
+
+card.addEventListener('click', () => openMenuModal(menu.ID_MENU));
+  container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading menus:', error);
+      }
+    }
+
+
+   async function openMenuModal(menuId) {
+  try {
+    // Get menu detail
+    const res = await fetch(`/api/menu/${menuId}`);
+    const menu = await res.json();
+
+    // Fill modal content
+    document.getElementById('modalImage').src = menu.IMAGE_MENU;
+    document.getElementById('modalTitle').textContent = menu.NAME_MENU;
+    document.getElementById('modalType').textContent = `ประเภท: ${menu.MENU_TYPE_DES}`;
+    document.getElementById('modalTime').textContent = `เวลา: ${menu.TIME_DESCRIPTION} นาที`;
+    document.getElementById('modalLevel').textContent = `ระดับ: ${menu.MENU_DESCRIPTION}`;
+    document.getElementById('modalIngredients').textContent = `วัตถุดิบ: ${menu.INGREDIENTS_MENU}`;
+    document.getElementById('modalProcess').textContent = `วิธีทำ: ${menu.PROCESS_MENU}`;
+
+    // Prepare stars for rating
+    const rating = document.getElementById('ratingSection');
+    rating.innerHTML = '';
+
+    // Get current session user
+    const sessionRes = await fetch('/api/session');
+    const sessionData = await sessionRes.json();
+
+    const currentUserId = sessionData?.user?.username;
+    const menuOwnerId = menu?.ID_USERADD;
+    // console.log(currentUserId);
+    // console.log(menuOwnerId);
+    const isOwner = currentUserId && menuOwnerId && currentUserId === menuOwnerId;
+    // console.log(isOwner)
+    const userScore = menu.USER_SCORE;
+    for (let i = 1; i <= 5; i++) {
+      const star = document.createElement('span');
+      star.textContent = i <= Math.round(menu.SCORE) ? '★' : '☆';
+      
+      // Only allow rating if logged in and NOT owner
+      
+      if (sessionData.loggedIn) {
+        if (isOwner) {
+          // Owner cannot rate
+          star.classList.add('text-yellow-300', 'text-2xl', 'cursor-default');
+          star.addEventListener('click', () => alert('ไม่สามารถให้คะแนนเมนูตัวเองได้'));
+        } else if (userScore != null) {
+          // User already rated: show stars, no click
+          star.classList.add('text-yellow-500', 'text-2xl', 'cursor-default');
+        } else {
+          // User logged in, not owner, not rated yet: allow rating
+          star.classList.add('cursor-pointer', 'text-yellow-500', 'text-2xl');
+          star.addEventListener('click', () => submitRating(menuId, i));
+        }
+      } else {
+    star.classList.add('text-yellow-300', 'text-2xl');
+    }
+
+      rating.appendChild(star);
+    }
+
+    // Show modal
+    document.getElementById('menuModal').classList.remove('hidden');
+  } catch (err) {
+    console.error('Error loading menu detail:', err);
+  }
+}
+
+
+document.getElementById('closeMenuModal').addEventListener('click', () => {
+  document.getElementById('menuModal').classList.add('hidden');
+//   window.location.reload();
+});
+
+async function submitRating(menuId, score) {
+  try {
+    const res = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_menu: menuId, score })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message || 'ให้คะแนนสำเร็จ');
+      openMenuModal(menuId);
+    } else {
+      alert(data.error || 'ให้คะแนนไม่สำเร็จ');
+    }
+  } catch (err) {
+    console.error('Error submitting score:', err);
+  }
+}
+
+
+async function loadMenus() {
+  const type = document.getElementById('filterType').value;
+  const level = document.getElementById('filterLevel').value;
+  const time = document.getElementById('filterTime').value;
+  const user = document.getElementById('filterUser').value;
+  const rating = document.getElementById('filterRating').value;
+
+  const params = new URLSearchParams();
+  if (type) params.append('type', type);
+  if (level) params.append('level', level);
+  if (time) params.append('time', time);
+  if (user) params.append('user', user);
+  if (rating) params.append('rating', rating);
+    console.log(params);
+  try {
+    const res = await fetch(`/api/menus?${params.toString()}`);
+    const menus = await res.json();
+    const container = document.getElementById('menuCards');
+    container.innerHTML = '';
+
+    menus.forEach(menu => {
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-lg shadow hover:shadow-lg transition p-4';
+      card.innerHTML = `
+        <img src="${menu.IMAGE_MENU}" class="w-full h-48 object-cover rounded mb-4">
+        <h2 class="text-xl font-bold text-orange-600 mb-1">${menu.NAME_MENU}</h2>
+        <p class="text-sm text-gray-600 mb-1">ประเภท: ${menu.MENU_TYPE_DES || '-'}</p>
+        <p class="text-sm text-gray-600 mb-1">เวลา: ${menu.TIME_DESCRIPTION || '-'} นาที</p>
+        <p class="text-sm text-gray-600 mb-2">ระดับ: ${menu.MENU_DESCRIPTION || '-'}</p>
+        <div class="flex text-yellow-400 text-xl">
+          ${'★'.repeat(Math.round(menu.SCORE))}${'☆'.repeat(5 - Math.round(menu.SCORE))}
+        </div>
+      `;
+      card.addEventListener('click', () => openMenuModal(menu.ID_MENU));
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Error loading menus:', err);
+  }
+}
+
+
+// Fetch and fill dropdowns
+async function loadFilterOptions() {
+  try {
+    const [types, levels, times] = await Promise.all([
+      fetch('/api/menu-type').then(res => res.json()),
+      fetch('/api/menu-level').then(res => res.json()),
+      fetch('/api/menu-time').then(res => res.json())
+    ]);
+
+    const typeSelect = document.getElementById('filterType');
+    types.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type.MENU_CODE_TYPE;
+      option.textContent = type.MENU_TYPE_DES;
+      typeSelect.appendChild(option);
+    });
+
+    const levelSelect = document.getElementById('filterLevel');
+    levels.forEach(level => {
+      const option = document.createElement('option');
+      option.value = level.MENU_LEVEL;
+      option.textContent = level.MENU_DESCRIPTION;
+      levelSelect.appendChild(option);
+    });
+
+    const timeSelect = document.getElementById('filterTime');
+    times.forEach(time => {
+      const option = document.createElement('option');
+      option.value = time.TIME;
+      option.textContent = time.TIME_DESCRIPTION;
+      timeSelect.appendChild(option);
+    });
+  } catch (err) {
+    console.error('Failed to load filter options:', err);
+  }
+}
+
+// Debounce helper
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+
+const filterUserInput = document.getElementById('filterUser');
+const userSuggestions = document.getElementById('userSuggestions');
+let userSelected = false;
+
+// Debounce input for suggestions
+filterUserInput.addEventListener('input', debounce(async () => {
+  const query = filterUserInput.value.trim();
+  userSelected = false; // user is typing
+
+  if (!query) {
+    userSuggestions.innerHTML = '';
+    userSuggestions.classList.add('hidden');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/users?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error('Failed to fetch users');
+    const users = await res.json();
+
+    if (users.length === 0) {
+      userSuggestions.innerHTML = '<li class="px-3 py-2 text-gray-500 cursor-default">No users found</li>';
+      userSuggestions.classList.remove('hidden');
+      return;
+    }
+
+    userSuggestions.innerHTML = users.map(user =>
+      `<li class="px-3 py-2 hover:bg-orange-200 cursor-pointer">${user.ID_USERADD}</li>`
+    ).join('');
+
+    userSuggestions.classList.remove('hidden');
+  } catch (err) {
+    console.error('Error fetching users:', err);
+  }
+}, 300));
+
+// When user clicks a suggestion
+userSuggestions.addEventListener('click', e => {
+  if (e.target.tagName.toLowerCase() === 'li') {
+    filterUserInput.value = e.target.textContent;
+    userSelected = true;
+    userSuggestions.classList.add('hidden');
+    loadMenus(); // ✅ Load only on selection
+  }
+});
+
+// Hide suggestions on outside click
+document.addEventListener('click', e => {
+  if (!filterUserInput.contains(e.target) && !userSuggestions.contains(e.target)) {
+    userSuggestions.classList.add('hidden');
+  }
+});
+
+// Debounce helper
+function debounce(fn, delay) {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
+// Load menus with filters
+async function loadMenus() {
+  const type = document.getElementById('filterType').value;
+  const level = document.getElementById('filterLevel').value;
+  const time = document.getElementById('filterTime').value;
+  const user = document.getElementById('filterUser').value;
+  const rating = document.getElementById('filterRating')?.value;
+
+  const params = new URLSearchParams();
+  if (type) params.append('type', type);
+  if (level) params.append('level', level);
+  if (time) params.append('time', time);
+  if (user && userSelected) params.append('user', user); // ✅ only send user if selected
+  if (rating) params.append('rating', rating);
+
+  console.log(params.toString());
+
+  try {
+    const res = await fetch(`/api/menus?${params.toString()}`);
+    const menus = await res.json();
+    const container = document.getElementById('menuCards');
+    container.innerHTML = '';
+
+    menus.forEach(menu => {
+      const card = document.createElement('div');
+      card.className = 'bg-white rounded-lg shadow hover:shadow-lg transition p-4 cursor-pointer';
+      card.innerHTML = `
+        <img src="${menu.IMAGE_MENU}" class="w-full h-48 object-cover rounded mb-4" alt="${menu.NAME_MENU}">
+        <h2 class="text-xl font-bold text-orange-600 mb-1">${menu.NAME_MENU}</h2>
+        <p class="text-sm text-gray-600 mb-1">ประเภท: ${menu.MENU_TYPE_DES || '-'}</p>
+        <p class="text-sm text-gray-600 mb-1">เวลา: ${menu.TIME_DESCRIPTION || '-'} นาที</p>
+        <p class="text-sm text-gray-600 mb-2">ระดับ: ${menu.MENU_DESCRIPTION || '-'}</p>
+        <div class="flex text-yellow-400 text-xl">
+          ${'★'.repeat(Math.round(menu.SCORE))}${'☆'.repeat(5 - Math.round(menu.SCORE))}
+        </div>
+      `;
+      card.addEventListener('click', () => openMenuModal(menu.ID_MENU));
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Error loading menus:', err);
+  }
+}
+
+
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>จัดการสูตรอาหาร</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Prompt", serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white shadow-md p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-orange-600 cursor-pointer" onclick="location.href='index.html'">📖 วงนอก</h1>
+    <div id="profileMenu" class="flex items-center gap-3">
+      <span id="userName" class="text-gray-700 font-medium">สวัสดีคุณ ผู้ใช้</span>
+      <button id="profileBtn" class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-300 focus:outline-none">
+        <img src="https://www.svgrepo.com/show/437117/person-crop-circle.svg" alt="User" class="w-full h-full object-cover" />
+      </button>
+      <!-- Dropdown menu -->
+      <div id="dropdownMenu" class="absolute right-0 mt-12 w-40 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+        <a href="manage.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">จัดการสูตรอาหาร</a>
+        <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto p-6 space-y-8">
+
+    <h2 class="text-3xl font-semibold text-gray-800 mb-6">จัดการสูตรอาหาร</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- เพิ่มสูตรอาหาร -->
+      <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" alt="Add Recipe" class="w-20 h-20 mb-4" />
+        <h3 class="text-xl font-semibold mb-2">เพิ่มสูตรอาหาร</h3>
+        <p class="text-gray-600 mb-4 text-center">เพิ่มสูตรอาหารใหม่เข้าสู่ระบบของคุณ</p>
+        <button id="openAddRecipeModal" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded">เพิ่มสูตร</button>
+      </div>
+
+      <!-- แก้ไขสูตรอาหาร -->
+      <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Edit Recipe" class="w-20 h-20 mb-4" />
+        <h3 class="text-xl font-semibold mb-2">แก้ไขสูตรอาหาร</h3>
+        <p class="text-gray-600 mb-4 text-center">แก้ไขข้อมูลสูตรอาหารที่มีอยู่</p>
+        <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded" onclick="openEditModal()">แก้ไขสูตร</button>
+      </div>
+
+      <!-- ลบสูตรอาหาร
+      <div class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Delete Recipe" class="w-20 h-20 mb-4" />
+        <h3 class="text-xl font-semibold mb-2">ลบสูตรอาหาร</h3>
+        <p class="text-gray-600 mb-4 text-center">ลบสูตรอาหารที่ไม่ต้องการออกจากระบบ</p>
+        <button class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded" onclick="alert('ฟังก์ชันลบสูตรอาหารยังไม่พร้อมใช้งาน')">ลบสูตร</button>
+      </div> -->
+
+    </div>
+
+  </main>
+
+
+<!-- Modal -->
+<div id="addRecipeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 space-y-4">
+    <h2 class="text-xl font-bold mb-2 text-center">เพิ่มสูตรอาหาร</h2>
+    <form id="addRecipeForm" enctype="multipart/form-data" class="space-y-4">
+  <input type="text" id="menuName" name="name" placeholder="ชื่ออาหาร" required class="w-full border rounded p-2" />
+
+  <select id="menuType" name="type" required class="w-full border rounded p-2">
+    <option value="">ประเภทอาหาร</option>
+    <option value="M_01">ต้ม</option>
+    <option value="M_02">ผัด</option>
+    <option value="M_03">แกง</option>
+    <option value="M_04">ทอด</option>
+  </select>
+
+  <div>
+    <label class="block mb-1 font-medium">รูปอาหาร</label>
+    <input type="file" id="menuImage" name="image" accept="image/*" required class="w-full" />
+  </div>
+
+  <textarea id="menuIngredients" name="ingredients" placeholder="วัตถุดิบ" rows="3" required class="w-full border rounded p-2"></textarea>
+  <textarea id="menuProcess" name="process" placeholder="ขั้นตอนการทำ" rows="4" required class="w-full border rounded p-2"></textarea>
+
+  <select id="menuTime" name="time" required class="w-full border rounded p-2">
+    <option value="">ระยะเวลา</option>
+    <option value="T_1">5 - 10 mins</option>
+    <option value="T_2">11 - 30 mins</option>
+    <option value="T_3">31 - 60 mins</option>
+    <option value="T_4">60+ mins</option>
+  </select>
+
+  <select id="menuLevel" name="level" required class="w-full border rounded p-2">
+    <option value="">ความยากง่ายของสูตร</option>
+    <option value="L_1">Easy</option>
+    <option value="L_2">Medium</option>
+    <option value="L_3">Hard</option>
+  </select>
+
+  <div class="flex justify-end gap-2">
+    <button type="button" id="closeAddRecipeModal" class="text-gray-500 hover:underline">ยกเลิก</button>
+    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">เพิ่มสูตร</button>
+  </div>
+</form>
+  </div>
+</div>
+
+
+<!-- Recipe List Modal -->
+<div id="editRecipeModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+    <h2 class="text-xl font-bold text-center text-yellow-600">สูตรอาหารของคุณ</h2>
+    <div id="recipeList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Recipes will be inserted here dynamically -->
+    </div>
+    <div class="text-right">
+      <button onclick="closeEditModal()" class="text-gray-500 hover:underline">ปิด</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Edit Recipe Modal -->
+<div id="editFormModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+    <h2 class="text-xl font-bold text-yellow-600 text-center">แก้ไขสูตรอาหาร</h2>
+    <form id="editRecipeForm" class="space-y-4" enctype="multipart/form-data">
+      <input type="hidden" id="editMenuId" />
+
+      <div>
+        <label class="block font-medium mb-1">ชื่ออาหาร</label>
+        <input type="text" id="editMenuName" required class="w-full border rounded p-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">ประเภทอาหาร</label>
+        <select id="editMenuType" required class="w-full border rounded p-2">
+          <option value="">เลือกประเภทอาหาร</option>
+          <option value="M_01">ต้ม</option>
+          <option value="M_02">ผัด</option>
+          <option value="M_03">แกง</option>
+          <option value="M_04">ทอด</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">วัตถุดิบ</label>
+        <textarea id="editMenuIngredients" rows="3" required class="w-full border rounded p-2"></textarea>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">ขั้นตอนการทำ</label>
+        <textarea id="editMenuProcess" rows="4" required class="w-full border rounded p-2"></textarea>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">ระยะเวลา</label>
+        <select id="editMenuTime" required class="w-full border rounded p-2">
+          <option value="">เลือกระยะเวลา</option>
+          <option value="T_1">5 - 10 mins</option>
+          <option value="T_2">11 - 30 mins</option>
+          <option value="T_3">31 - 60 mins</option>
+          <option value="T_4">60+ mins</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">ระดับความยาก</label>
+        <select id="editMenuLevel" required class="w-full border rounded p-2">
+          <option value="">เลือกระดับ</option>
+          <option value="L_1">ง่าย</option>
+          <option value="L_2">ปานกลาง</option>
+          <option value="L_3">ยาก</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1">เปลี่ยนรูปอาหาร (ถ้าต้องการ)</label>
+        <input type="file" id="editMenuImage" accept="image/*" class="w-full" />
+        <img id="editImagePreview" src="" class="w-32 h-32 mt-2 rounded-full object-cover border" />
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeEditFormModal()" class="text-gray-500 hover:underline">ยกเลิก</button>
+        <button type="submit" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">บันทึกการแก้ไข</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <script>
+    // Dropdown toggle
+    const profileBtn = document.getElementById('profileBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const openModalBtn = document.getElementById('openAddRecipeModal');
+    const closeModalBtn = document.getElementById('closeAddRecipeModal');
+    const modal = document.getElementById('addRecipeModal');
+
+    profileBtn.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('hidden');
+    });
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.add('hidden');
+      }
+    });
+
+    // Logout button
+    document.addEventListener('click', async (e) => {
+      if (e.target.id === 'logoutBtn') {
+        await fetch('/api/logout', { method: 'POST' });
+        location.href = 'index.html';
+      }
+    });
+
+    // Login session
+      window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/api/session');
+      const data = await res.json();
+
+      if (data.loggedIn) {
+         document.getElementById('userName').innerHTML = `สวัสดีคุณ <strong>${data.user.name}</strong>`;
+      } else {
+        location.href = 'index.html'; // Not logged in, redirect
+      }
+    } catch (err) {
+      console.error('Session check failed:', err);
+      location.href = 'index.html'; // fallback
+    }
+  });
+
+  openModalBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+  });
+
+  closeModalBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+  });
+
+
+
+  document.getElementById('addRecipeForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append('name', document.getElementById('menuName').value);
+  formData.append('type', document.getElementById('menuType').value);
+  formData.append('image', document.getElementById('menuImage').files[0]);
+  formData.append('ingredients', document.getElementById('menuIngredients').value);
+  formData.append('process', document.getElementById('menuProcess').value);
+  formData.append('time', document.getElementById('menuTime').value);
+  formData.append('level', document.getElementById('menuLevel').value);
+
+  try {
+    const res = await fetch('/api/add-menu', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert('เพิ่มสูตรอาหารสำเร็จ!');
+      document.getElementById('addRecipeForm').reset();
+      document.getElementById('addRecipeModal').classList.add('hidden');
+    } else {
+      alert('ไม่สามารถเพิ่มสูตรอาหารได้');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('เกิดข้อผิดพลาดในการส่งข้อมูล');
+  }
+});
+
+
+async function openEditModal() {
+  try {
+    const res = await fetch('/api/my-recipes');
+    const recipes = await res.json();
+    const recipeList = document.getElementById('recipeList');
+    recipeList.innerHTML = '';
+
+    if (recipes.length === 0) {
+      recipeList.innerHTML = '<p class="text-center text-gray-500 col-span-full">ยังไม่มีสูตรอาหาร</p>';
+    } else {
+      recipes.forEach(r => {
+        recipeList.innerHTML += `
+          <div class="flex items-center bg-gray-50 rounded-lg shadow p-4 gap-4">
+            <img src="${r.IMAGE_MENU}" alt="${r.NAME_MENU}" class="w-16 h-16 rounded-full object-cover border" />
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-800">${r.NAME_MENU}</h3>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="openEditFormModal(
+  ${r.ID_MENU}, 
+  \`${r.NAME_MENU}\`, 
+  \`${r.INGREDIENTS_MENU || ''}\`, 
+  \`${r.PROCESS_MENU || ''}\`, 
+  \`${r.TYPE_MENU || ''}\`, 
+  \`${r.TIME_MENU || ''}\`, 
+  \`${r.LEVEL_MENU || ''}\`, 
+  \`${r.IMAGE_MENU || ''}\`
+)" class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded">แก้ไข</button>
+              <button onclick="deleteMenu(${r.ID_MENU})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">ลบ</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById('editRecipeModal').classList.remove('hidden');
+  } catch (err) {
+    console.error('Error loading recipes:', err);
+    alert('ไม่สามารถโหลดข้อมูลสูตรอาหารได้');
+  }
+}
+
+function closeEditModal() {
+  document.getElementById('editRecipeModal').classList.add('hidden');
+}
+
+function openEditFormModal(id, name, ingredients, process, type, time, level, imagePath) {
+  document.getElementById('editMenuId').value = id;
+  document.getElementById('editMenuName').value = name;
+  document.getElementById('editMenuIngredients').value = ingredients;
+  document.getElementById('editMenuProcess').value = process;
+  document.getElementById('editMenuType').value = type;
+  document.getElementById('editMenuTime').value = time;
+  document.getElementById('editMenuLevel').value = level;
+  document.getElementById('editImagePreview').src = imagePath;
+
+  document.getElementById('editFormModal').classList.remove('hidden');
+  console.log(type, time, level);
+}
+
+
+function closeEditFormModal() {
+  document.getElementById('editFormModal').classList.add('hidden');
+}
+
+document.getElementById('editRecipeForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData();
+  formData.append('id', document.getElementById('editMenuId').value);
+  formData.append('name', document.getElementById('editMenuName').value);
+  formData.append('type', document.getElementById('editMenuType').value);
+  formData.append('ingredients', document.getElementById('editMenuIngredients').value);
+  formData.append('process', document.getElementById('editMenuProcess').value);
+  formData.append('time', document.getElementById('editMenuTime').value);
+  formData.append('level', document.getElementById('editMenuLevel').value);
+
+  const image = document.getElementById('editMenuImage').files[0];
+  if (image) {
+    formData.append('image', image);
+  }
+
+  try {
+    const res = await fetch('/api/edit-menu', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert('แก้ไขสูตรอาหารสำเร็จ!');
+      closeEditFormModal();
+      openEditModal(); // refresh list
+    } else {
+      alert('ไม่สามารถแก้ไขสูตรได้');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('เกิดข้อผิดพลาด');
+  }
+});
+
+async function deleteMenu(id) {
+  if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบเมนูนี้?')) return;
+  console.log(id);
+  try {
+    const res = await fetch(`/api/my-recipes/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      throw new Error('ไม่สามารถลบเมนูได้');
+    }
+
+    alert('ลบเมนูเรียบร้อยแล้ว');
+    openEditModal(); // reload the menu list
+  } catch (err) {
+    console.error('Delete error:', err);
+    alert('เกิดข้อผิดพลาดในการลบเมนู');
+  }
+}
+  </script>
+
+</body>
+</html>
