@@ -19,8 +19,9 @@
 # Project Structure
 ├── public/                 # Frontend files
 │   ├── index.html          # Homepage
-│   ├── register.html       # User registration page
+│   ├── register.html  # User registration page
 │   ├── manage.html         # Recipe management UI
+│   ├── menu-type.html      # Show recipe for all menus
 │   └── asset/image/        # Uploaded images
 ├── server.js               # Node.js backend (Express app)
 ├── dbConfig.js             # SQL Server DB config
@@ -28,8 +29,8 @@
 └── web.config              # IIS setting
 # How to setup this Project
   1. Clone this project to your local by use command:
-     - git clone https://your-repo-url.git
-     - cd wongnok-recipe
+     - git clone https://github.com/moneyprik/513022-wongnok-recipes.git
+     - cd 513022-wongnok-recipes
   2. Install dependencies by use command : npm install
   3. Create a .env file and define details for your database connection
   4. run cmd command node server.js in root directory
